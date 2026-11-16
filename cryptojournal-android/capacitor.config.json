@@ -1,0 +1,9 @@
+{
+  "appId": "com.cryptojournal.pro",
+  "appName": "CryptoJournal Pro",
+  "webDir": "www",
+  "backgroundColor": "#080c16",
+  "android": {
+    "allowMixedContent": false
+  }
+}

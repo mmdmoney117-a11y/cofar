@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CryptoJournal Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c16;--card:#0f1628;--bd:#1c2640;--tx:#e8ecf5;--mu:#8793ab;--ac:#4f8cff;--up:#22c55e;--dn:#ef4444;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+:root[data-theme="light"]{--bg:#f3f5f9;--card:#fff;--bd:#dfe4ee;--tx:#131a2b;--mu:#667085;color-scheme:light}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 Vazirmatn,system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:16px 16px 96px}
+h1{font-size:21px;margin:6px 0 12px}h2{font-size:14px;color:var(--mu);margin:0 0 8px}
+.card,.tile{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.tile{padding:10px 12px;margin:0}.tile small{display:block;color:var(--mu);font-size:12px}.tile b{font-size:17px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}.sp{flex:1}
+.up{color:var(--up)}.dn{color:var(--dn)}.mu{color:var(--mu)}.n{direction:ltr;unicode-bidi:isolate;display:inline-block}
+label{font-size:12px;color:var(--mu)}
+input,select,textarea,button{font:inherit;font-size:16px}
+input,select,textarea{width:100%;margin-top:3px;padding:8px 10px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:10px}
+button{border:0;border-radius:10px;padding:8px 14px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
+button.ghost{background:none;color:var(--mu);border:1px solid var(--bd)}
+.tag{font-size:12px;padding:0 8px;border:1px solid currentColor;border-radius:99px}
+.nt{margin:6px 0 0;font-size:13px;white-space:pre-wrap}
+.ch{width:100%;height:150px;display:block}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.day{min-height:52px;border:1px solid var(--bd);border-radius:8px;padding:3px 4px;font-size:11px;overflow:hidden}.day small{color:var(--mu);display:block}
+.day.g{background:rgba(34,197,94,.16)}.day.r{background:rgba(239,68,68,.16)}.wd{text-align:center;color:var(--mu);font-size:11px}
+nav{position:fixed;bottom:0;inset-inline:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:5}
+nav button{flex:1;background:none;color:var(--mu);font-size:12px;padding:4px;display:flex;flex-direction:column;align-items:center}
+nav button.on{color:var(--ac)}nav span{font-size:18px}
+@media(min-width:760px){body{display:flex}nav{position:sticky;top:0;align-self:flex-start;height:100vh;width:190px;flex-direction:column;justify-content:flex-start;gap:4px;border-top:0;border-inline-end:1px solid var(--bd);padding:16px 10px}nav button{flex:0;flex-direction:row;gap:10px;font-size:15px;padding:10px}main{flex:1;padding-bottom:24px}.grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<nav id="nav"></nav>
+<main id="app"></main>
+<script>
+const K='cjp-v1',$=s=>document.querySelector(s);
+let S={trades:[],bal:10000,lang:'fa',theme:'dark'};
+try{Object.assign(S,JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){}
+const U={view:'dash',m:new Date().toISOString().slice(0,7),q:'',fs:'',edit:null,csv:''};
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const D={
+fa:{dash:'داشبورد',trades:'معاملات',cal:'تقویم',set:'تنظیمات',bal:'موجودی',net:'سود/زیان خالص',wr:'Win Rate',pf:'Profit Factor',ravg:'میانگین R',exp:'Expectancy',dd:'حداکثر Drawdown',wl:'برد / باخت',eq:'منحنی سرمایه',noeq:'برای نمودار حداقل یک معامله بسته لازم است.',add:'معامله جدید',save:'ذخیره',cancel:'انصراف',edit:'ویرایش',symbol:'نماد',market:'بازار',spot:'اسپات',fut:'فیوچرز',side:'جهت',long:'لانگ',short:'شورت',entry:'قیمت ورود',exit:'قیمت خروج',qty:'حجم',lev:'اهرم',sl:'حد ضرر',tp:'حد سود',fee:'کارمزد ($)',fund:'Funding ($)',dt:'تاریخ و ساعت',strat:'استراتژی',emo:'احساس',calm:'آرام',fear:'ترس',greed:'طمع',revenge:'انتقامی',note:'یادداشت',search:'جست‌وجو…',all:'همه',empty:'معامله‌ای ثبت نشده است.',open:'باز',startbal:'سرمایه اولیه ($)',lang:'زبان',theme:'تم',csv:'ساخت CSV',copy:'کپی',demo:'بارگذاری داده آزمایشی',rmdemo:'حذف داده آزمایشی',demoTag:'آزمایشی',wd:['ش','ی','د','س','چ','پ','ج']},
+en:{dash:'Dashboard',trades:'Trades',cal:'Calendar',set:'Settings',bal:'Balance',net:'Net PnL',wr:'Win Rate',pf:'Profit Factor',ravg:'Avg R',exp:'Expectancy',dd:'Max Drawdown',wl:'Wins / Losses',eq:'Equity Curve',noeq:'At least one closed trade is needed for the chart.',add:'New trade',save:'Save',cancel:'Cancel',edit:'Edit',symbol:'Symbol',market:'Market',spot:'Spot',fut:'Futures',side:'Side',long:'Long',short:'Short',entry:'Entry price',exit:'Exit price',qty:'Size',lev:'Leverage',sl:'Stop loss',tp:'Take profit',fee:'Fees ($)',fund:'Funding ($)',dt:'Date & time',strat:'Strategy',emo:'Emotion',calm:'Calm',fear:'Fear',greed:'Greed',revenge:'Revenge',note:'Notes',search:'Search…',all:'All',empty:'No trades yet.',open:'Open',startbal:'Starting balance ($)',lang:'Language',theme:'Theme',csv:'Build CSV',copy:'Copy',demo:'Load demo data',rmdemo:'Remove demo data',demoTag:'Demo',wd:['S','M','T','W','T','F','S']}};
+const t=k=>D[S.lang][k]??k;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const f=n=>Number.isFinite(n)?n.toLocaleString('en-US',{maximumFractionDigits:2}):'∞';
+const sg=v=>(v>0?'+':'')+f(v),cl=v=>v>0?'up':v<0?'dn':'',sum=a=>a.reduce((x,y)=>x+y,0);
+const nowL=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
+// net PnL = gross (long/short aware) - fees - funding
+const net=x=>x.exit==null?null:(x.side==='long'?x.exit-x.entry:x.entry-x.exit)*x.qty-(+x.fee||0)-(+x.fund||0);
+const rm=x=>{const r=x.sl?Math.abs(x.entry-x.sl)*x.qty:0,n=net(x);return r&&n!=null?n/r:null};
+function stats(){
+ const c=S.trades.filter(x=>x.exit!=null).sort((a,b)=>a.date.localeCompare(b.date)),p=c.map(net),tot=sum(p),w=p.filter(v=>v>0),l=p.filter(v=>v<0);
+ let e=S.bal,pk=e,dd=0;const eq=[e];p.forEach(v=>{e+=v;eq.push(e);pk=Math.max(pk,e);dd=Math.max(dd,pk-e)});
+ const rs=c.map(rm).filter(v=>v!=null);
+ return{c,tot,w,l,eq,dd,wr:c.length?w.length/c.length*100:0,pf:l.length?sum(w)/-sum(l):(w.length?Infinity:0),r:rs.length?sum(rs)/rs.length:0,ex:c.length?tot/c.length:0};
+}
+function chart(a){
+ if(a.length<2)return `<p class="mu">${t('noeq')}</p>`;
+ const mn=Math.min(...a),mx=Math.max(...a),r=mx-mn||1,X=i=>i/(a.length-1)*300,Y=v=>110-(v-mn)/r*100;
+ const pts=a.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' '),c=a[a.length-1]>=a[0]?'var(--up)':'var(--dn)';
+ return `<svg class="ch" viewBox="0 0 300 120" preserveAspectRatio="none" role="img" aria-label="${t('eq')}"><polygon points="0,120 ${pts} 300,120" fill="${c}" opacity=".12"/><polyline points="${pts}" fill="none" stroke="${c}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`;
+}
+function vDash(){
+ const s=stats(),T=(k,v,c)=>`<div class="tile"><small>${t(k)}</small><b class="n ${c||''}">${v}</b></div>`;
+ return `<h1>CryptoJournal Pro</h1><div class="grid">${T('bal',f(S.bal+s.tot)+' $')+T('net',sg(s.tot)+' $',cl(s.tot))+T('wr',f(s.wr)+'%')+T('pf',f(s.pf))+T('ravg',f(s.r)+'R',cl(s.r))+T('exp',sg(s.ex)+' $',cl(s.ex))+T('dd','-'+f(s.dd)+' $',s.dd?'dn':'')+T('wl',s.w.length+' / '+s.l.length)}</div><div class="card"><h2>${t('eq')}</h2>${chart(s.eq)}</div>`;
+}
+function vTrades(){
+ const e=U.edit,x=e==='new'?{date:nowL()}:e?(S.trades.find(y=>y.id===e)||{}):{};
+ const I=(n,ty='number',ex='')=>`<label>${t(n==='date'?'dt':n)}<input name="${n}" type="${ty}" ${ty==='number'?'step="any"':''} value="${esc(x[n]??'')}" ${ex}></label>`;
+ const O=(n,o)=>`<label>${t(n)}<select name="${n}">${o.map(v=>`<option value="${v}" ${x[n]===v?'selected':''}>${t(v)}</option>`).join('')}</select></label>`;
+ return `<div class="row"><h1>${t('trades')}</h1><span class="sp"></span><button data-a="new">+ ${t('add')}</button></div>
+${e?`<form class="card g2">${I('date','datetime-local','required')}${I('symbol','text','required')}${O('market',['spot','fut'])}${O('side',['long','short'])}${I('entry','number','required')}${I('exit')}${I('qty','number','required')}${I('lev')}${I('sl')}${I('tp')}${I('fee')}${I('fund')}${I('strat','text')}${O('emo',['calm','fear','greed','revenge'])}<label class="full">${t('note')}<textarea name="note">${esc(x.note||'')}</textarea></label><div class="full row"><button>${t('save')}</button><button type="button" class="ghost" data-a="cancel">${t('cancel')}</button></div></form>`:''}
+<div class="g2" style="margin-bottom:12px"><input id="q" placeholder="${t('search')}" value="${esc(U.q)}"><select id="fs">${['','long','short','spot','fut'].map(v=>`<option value="${v}" ${U.fs===v?'selected':''}>${v?t(v):t('all')}</option>`).join('')}</select></div><div id="tl"></div>`;
+}
+function renderList(){
+ const q=U.q.toLowerCase(),L=S.trades.filter(x=>(!U.fs||x.side===U.fs||x.market===U.fs)&&(!q||(x.symbol+' '+(x.strat||'')+' '+(x.note||'')).toLowerCase().includes(q))).sort((a,b)=>b.date.localeCompare(a.date));
+ $('#tl').innerHTML=L.length?L.map(x=>{const n=net(x),r=rm(x);return `<article class="card"><div class="row"><b class="n">${esc(x.symbol)}</b><span class="tag ${x.side==='long'?'up':'dn'}">${t(x.side)}</span><span class="tag">${t(x.market)}${x.market==='fut'&&x.lev?' '+x.lev+'x':''}</span>${x.demo?`<span class="tag">${t('demoTag')}</span>`:''}<span class="mu n">${x.date.replace('T',' ')}</span></div>
+<div class="row mu"><span>${t('entry')} <span class="n">${f(x.entry)}</span></span><span>${t('exit')} <span class="n">${x.exit==null?'—':f(x.exit)}</span></span><span>${t('qty')} <span class="n">${f(x.qty)}</span></span></div>
+<div class="row"><b class="n ${cl(n)}">${n==null?t('open'):sg(n)+' $'}</b>${r!=null?`<span class="mu n">${f(r)}R</span>`:''}<span class="mu">${esc(x.strat||'')}</span><span class="sp"></span><button class="ghost" data-e="${x.id}">${t('edit')}</button><button class="ghost" data-d="${x.id}" aria-label="delete">✕</button></div>${x.note?`<p class="mu nt">${esc(x.note)}</p>`:''}</article>`}).join(''):`<p class="mu">${t('empty')}</p>`;
+}
+function vCal(){
+ const [y,m]=U.m.split('-').map(Number),days=new Date(y,m,0).getDate(),g=new Date(y,m-1,1).getDay(),off=S.lang==='fa'?(g+1)%7:g,dm={};
+ S.trades.forEach(x=>{const n=net(x),k=x.date.slice(0,10);if(n!=null)dm[k]=(dm[k]||0)+n});
+ let cells=t('wd').map(d=>`<div class="wd">${d}</div>`).join('')+'<i></i>'.repeat(off);
+ for(let d=1;d<=days;d++){const v=dm[U.m+'-'+String(d).padStart(2,'0')];cells+=`<div class="day ${v>0?'g':v<0?'r':''}"><small>${d}</small>${v!=null?`<b class="n ${cl(v)}">${sg(v)}</b>`:''}</div>`}
+ const mt=sum(Object.keys(dm).filter(k=>k.startsWith(U.m)).map(k=>dm[k])),fa=S.lang==='fa';
+ const title=new Date(y,m-1,1).toLocaleDateString(fa?'fa-IR-u-ca-gregory':'en-US',{month:'long',year:'numeric'});
+ return `<h1>${t('cal')}</h1><div class="card"><div class="row"><button class="ghost" data-m="-1">${fa?'›':'‹'}</button><b>${title}</b><button class="ghost" data-m="1">${fa?'‹':'›'}</button><span class="sp"></span><b class="n ${cl(mt)}">${sg(mt)} $</b></div><div class="cal">${cells}</div></div>`;
+}
+function vSet(){
+ const o=(a,v)=>a.map(([k,l])=>`<option value="${k}" ${v===k?'selected':''}>${l}</option>`).join('');
+ return `<h1>${t('set')}</h1><div class="card g2"><label>${t('startbal')}<input id="bal" type="number" value="${S.bal}"></label><label>${t('lang')}<select id="lg">${o([['fa','فارسی'],['en','English']],S.lang)}</select></label><label>${t('theme')}<select id="th">${o([['dark','Dark'],['light','Light']],S.theme)}</select></label></div>
+<div class="card"><div class="row"><button data-a="csv">${t('csv')}</button><button class="ghost" data-a="demo">${t('demo')}</button><button class="ghost" data-a="rmdemo">${t('rmdemo')}</button></div>${U.csv?`<textarea id="csv" readonly rows="6" style="direction:ltr">${esc(U.csv)}</textarea><div class="row" style="margin-top:8px"><button data-a="copy">${t('copy')}</button></div>`:''}</div>`;
+}
+const csv=()=>{const h=['date','symbol','market','side','entry','exit','qty','lev','sl','tp','fee','fund','strat','emo','net','note'];return [h.join(',')].concat(S.trades.map(x=>h.map(k=>`"${String(k==='net'?(net(x)??''):(x[k]??'')).replace(/"/g,'""')}"`).join(','))).join('\n')};
+function demo(){
+ const R=[['BTC','long',60000,61500,.1,59000],['ETH','short',3200,3100,2,3300],['SOL','long',150,142,10,145],['BTC','short',62000,62800,.1,63000],['ETH','long',3000,3250,1.5,2900],['SOL','short',160,150,8,165]],b=Date.now(),o=new Date().getTimezoneOffset()*6e4;
+ R.forEach((r,i)=>{const fu=r[1]==='short'||i>3;S.trades.push({id:b+i,demo:1,date:new Date(b-(R.length-i)*864e5-o).toISOString().slice(0,16),symbol:r[0],market:fu?'fut':'spot',side:r[1],entry:r[2],exit:r[3],qty:r[4],lev:fu?5:null,sl:r[5],tp:null,fee:3,fund:fu?1:0,strat:'Breakout',emo:'calm',note:''})});
+}
+function render(){
+ const h=document.documentElement;h.lang=S.lang;h.dir=S.lang==='fa'?'rtl':'ltr';h.dataset.theme=S.theme;
+ $('#nav').innerHTML=[['dash','◧'],['trades','☰'],['cal','▦'],['set','⚙']].map(([k,i])=>`<button class="${U.view===k?'on':''}" data-v="${k}"><span>${i}</span>${t(k)}</button>`).join('')+`<button data-a="lang"><span>🌐</span>${S.lang==='fa'?'EN':'FA'}</button>`;
+ $('#app').innerHTML=({dash:vDash,trades:vTrades,cal:vCal,set:vSet})[U.view]();
+ if(U.view==='trades')renderList();
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.v){U.view=d.v;U.edit=null;U.csv=''}
+ else if(d.a==='new')U.edit='new';
+ else if(d.a==='cancel')U.edit=null;
+ else if(d.a==='lang'){S.lang=S.lang==='fa'?'en':'fa';save()}
+ else if(d.e)U.edit=+d.e;
+ else if(d.d){S.trades=S.trades.filter(x=>String(x.id)!==d.d);save()}
+ else if(d.m){const [y,m]=U.m.split('-').map(Number),n=new Date(y,m-1+ +d.m,1);U.m=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')}
+ else if(d.a==='csv')U.csv=csv();
+ else if(d.a==='copy'){try{navigator.clipboard.writeText(U.csv)}catch(_){$('#csv').select()}return}
+ else if(d.a==='demo'){demo();save()}
+ else if(d.a==='rmdemo'){S.trades=S.trades.filter(x=>!x.demo);save()}
+ else return;
+ render();
+});
+document.addEventListener('submit',e=>{
+ e.preventDefault();
+ const g=e.target.elements,v=n=>g[n].value,nm=n=>v(n)===''?null:+v(n);
+ const o={date:v('date'),symbol:v('symbol').trim().toUpperCase(),market:v('market'),side:v('side'),entry:+v('entry'),exit:nm('exit'),qty:+v('qty'),lev:nm('lev'),sl:nm('sl'),tp:nm('tp'),fee:+v('fee')||0,fund:+v('fund')||0,strat:v('strat').trim(),emo:v('emo'),note:v('note').trim()};
+ if(U.edit==='new')S.trades.push({id:Date.now(),...o});else{const x=S.trades.find(y=>y.id===U.edit);if(x)Object.assign(x,o)}
+ U.edit=null;save();render();
+});
+document.addEventListener('input',e=>{const i=e.target.id;if(i==='q'){U.q=e.target.value;renderList()}else if(i==='bal'){S.bal=+e.target.value||0;save()}});
+document.addEventListener('change',e=>{const i=e.target.id,v=e.target.value;if(i==='fs'){U.fs=v;renderList()}else if(i==='lg'){S.lang=v;save();render()}else if(i==='th'){S.theme=v;save();render()}});
+render();
+</script>
+</body>
+</html>
